@@ -37,7 +37,7 @@ namespace QuoteCortanaSkill.Dialogs
 
             var message = context.MakeMessage();
             message.Attachments.Add(heroCard.ToAttachment());
-            message.Speak = $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\">Here is a random quote for you.<break />{randomQuote.QuoteText} by<break />{randomQuote.QuoteAuthor}.</speak>";
+            message.Speak = $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\">Here is a random quote for you.<break />{randomQuote.QuoteText} by {randomQuote.QuoteAuthor}.</speak>";
 
             await context.PostAsync(message);
 
