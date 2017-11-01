@@ -2,9 +2,11 @@
 using System.Threading.Tasks;
 using Microsoft.Bot.Connector;
 using QuoteCortanaSkill.Services;
+using System;
 
 namespace QuoteCortanaSkill.Dialogs
 {
+    [Serializable]
     public class QuoteDialog : IDialog<object>
     {
         public Task StartAsync(IDialogContext context)
@@ -28,8 +30,8 @@ namespace QuoteCortanaSkill.Dialogs
             // create hero card
             var heroCard = new HeroCard
             {
-                Title = randomQuote.QuoteAuthor,
-                Subtitle = "Random Quote",
+                Title = "Random Quote",
+                Subtitle = $"by {randomQuote.QuoteAuthor}",
                 Text = $"\"{randomQuote.QuoteText}\""
             };
 
