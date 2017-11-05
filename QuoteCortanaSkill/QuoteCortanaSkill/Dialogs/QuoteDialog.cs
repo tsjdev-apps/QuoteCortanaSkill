@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Connector;
 using QuoteCortanaSkill.Services;
 using System;
-using System.Collections.Generic;
-using QuoteCortanaSkill.Extensions;
 using Microsoft.Cognitive.LUIS;
 using System.Web.Configuration;
 
@@ -16,30 +14,6 @@ namespace QuoteCortanaSkill.Dialogs
         private const string HelloIntent = "HelloIntent";
         private const string HelpIntent = "HelpIntent";
         private const string QuoteIntent = "QuoteIntent";
-        private const string None = "None";
-
-        private readonly List<string> _launchMessages = new List<string>
-        {
-            "Welcome to the Random Quote ! Please ask for example: Tell me a quote.",
-            "Greeting. For the a randomly picked quote ask for it."
-        };
-
-        private readonly List<string> _helpMessages = new List<string>
-        {
-            "I will tell you a quote by a famous person if you want. Please ask for example: Tell me a quote.",
-            "Please ask for example: Tell me a quote.",
-            "Do you want a quote? Ask for it.",
-        };
-
-        private readonly List<string> _errorMessages = new List<string>
-        {
-            "Oh no, something went wrong.",
-            "Something went wrong.",
-            "Mayday, I need help, because something went wrong.",
-            "That did not work, please try again later"
-        };
-
-
 
         public Task StartAsync(IDialogContext context)
         {
@@ -49,37 +23,48 @@ namespace QuoteCortanaSkill.Dialogs
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
         {
-            if (await result is Activity activity)
+            try
             {
-                var client = new LuisClient(WebConfigurationManager.AppSettings["LuisAppId"], WebConfigurationManager.AppSettings["LuisSubscriptionKey"]);
-
-                var prediction = await client.Predict(activity.Text);
-                var predictedIntent = prediction.TopScoringIntent.Name;
-
-                switch (predictedIntent)
+                if (await result is Activity activity)
                 {
-                    case None:
-                    case HelloIntent:
-                        await GetRandomAnswerAsync(context, _launchMessages);
-                        break;
-                    case HelpIntent:
-                        await GetRandomAnswerAsync(context, _helpMessages);
-                        break;
-                    case QuoteIntent:
-                        await HandleQuoteIntentAsync(context);
-                        break;
-                    default:
-                        await GetRandomAnswerAsync(context, _errorMessages);
-                        break;
+                    var client = new LuisClient(WebConfigurationManager.AppSettings["LuisAppId"], WebConfigurationManager.AppSettings["LuisSubscriptionKey"]);
+
+                    if (string.IsNullOrEmpty(activity.Text))
+                    {
+                        await SayAnswerAsync(context, MessagesService.GetLaunchMessage());
+                        return;
+                    }
+
+                    var prediction = await client.Predict(activity.Text);
+                    var predictedIntent = prediction.TopScoringIntent.Name;
+
+                    switch (predictedIntent)
+                    {
+                        case HelloIntent:
+                            await SayAnswerAsync(context, MessagesService.GetLaunchMessage());
+                            break;
+                        case HelpIntent:
+                            await SayAnswerAsync(context, MessagesService.GetHelpMessage());
+                            break;
+                        case QuoteIntent:
+                            await HandleQuoteIntentAsync(context);
+                            break;
+                        default:
+                            await SayAnswerAsync(context, MessagesService.GetHelpMessage());
+                            break;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                await context.PostAsync($"{MessagesService.GetErrorMessage()} {Environment.NewLine} {ex.Message}");
+                context.Wait(MessageReceivedAsync);
             }
         }
 
-        private async Task GetRandomAnswerAsync(IDialogContext context, List<string> messages)
+        private async Task SayAnswerAsync(IDialogContext context, string speak, string text = null)
         {
-            var message = messages.PickRandom();
-            await context.SayAsync(message, message);
-
+            await context.SayAsync(text ?? speak, speak);
             context.Wait(MessageReceivedAsync);
         }
 
@@ -93,12 +78,12 @@ namespace QuoteCortanaSkill.Dialogs
             {
                 Title = "Random Quote",
                 Subtitle = $"by {randomQuote.QuoteAuthor}",
-                Text = $"\"{randomQuote.QuoteText}\""
+                Text = $"\"{randomQuote.QuoteText.Trim()}\""
             };
 
             var message = context.MakeMessage();
             message.Attachments.Add(heroCard.ToAttachment());
-            message.Speak = $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\">Here is a random quote for you.<break />{randomQuote.QuoteText} by {randomQuote.QuoteAuthor}.</speak>";
+            message.Speak = $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\">{MessagesService.GetQuoteBaseMessage()} <break /> {randomQuote.QuoteText} by {randomQuote.QuoteAuthor}.</speak>";
 
             await context.PostAsync(message);
 
