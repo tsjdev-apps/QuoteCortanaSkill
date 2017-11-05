@@ -1,0 +1,80 @@
+{
+  "luis_schema_version": "2.1.0",
+  "versionId": "0.1",
+  "name": "Random Quote",
+  "desc": "Simple Cortana Skill to get a random quote",
+  "culture": "en-us",
+  "intents": [
+    {
+      "name": "HelloIntent"
+    },
+    {
+      "name": "HelpIntent"
+    },
+    {
+      "name": "None"
+    },
+    {
+      "name": "QuoteIntent"
+    }
+  ],
+  "entities": [],
+  "composites": [],
+  "closedLists": [],
+  "bing_entities": [],
+  "actions": [],
+  "model_features": [],
+  "regex_features": [],
+  "utterances": [
+    {
+      "text": "hello",
+      "intent": "HelloIntent",
+      "entities": []
+    },
+    {
+      "text": "hi",
+      "intent": "HelloIntent",
+      "entities": []
+    },
+    {
+      "text": "how are you",
+      "intent": "HelloIntent",
+      "entities": []
+    },
+    {
+      "text": "what can i do",
+      "intent": "HelpIntent",
+      "entities": []
+    },
+    {
+      "text": "i need help",
+      "intent": "HelpIntent",
+      "entities": []
+    },
+    {
+      "text": "help me",
+      "intent": "HelpIntent",
+      "entities": []
+    },
+    {
+      "text": "quote",
+      "intent": "QuoteIntent",
+      "entities": []
+    },
+    {
+      "text": "give me a quote",
+      "intent": "QuoteIntent",
+      "entities": []
+    },
+    {
+      "text": "random quote",
+      "intent": "QuoteIntent",
+      "entities": []
+    },
+    {
+      "text": "give me a random quote",
+      "intent": "QuoteIntent",
+      "entities": []
+    }
+  ]
+}
